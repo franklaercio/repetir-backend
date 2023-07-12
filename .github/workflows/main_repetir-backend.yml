@@ -17,25 +17,17 @@ jobs:
     - name: Checkout do repositório
       uses: actions/checkout@v2
 
-    - name: Instalar o Rush globalmente
-      run: npm install -g @microsoft/rush
-
     - name: Atualizar as dependências com o Rush
-      run: rush update
+      run: npm install
       
     - name: Resetar o banco de dados (api)
-      run: |
-        cd src/api
-        rushx db:reset
+      run: npm db:reset
+
     - name: Preencher o banco de dados (api)
-      run: |
-        cd src/api
-        rushx db:heavily-seed   
+      run: npm db:heavily-seed   
 
     - name: Iniciar o servidor de desenvolvimento (api)
-      run: |
-        cd src/api
-        rushx build
+      run: npm build
 
     - name: Upload artifact for deployment job
       uses: actions/upload-artifact@v2
