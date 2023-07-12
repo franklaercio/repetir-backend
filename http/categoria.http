@@ -1,0 +1,8 @@
+@baseUrl = {{$dotenv BASE_URL}}/categoria
+@token = Bearer {{$dotenv TOKEN}}
+
+GET {{baseUrl}}
+Authorization: {{token}}
+
+###
+
