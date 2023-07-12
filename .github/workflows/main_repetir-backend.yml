@@ -12,26 +12,37 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-
+    
     steps:
-      - uses: actions/checkout@v2
+    - name: Checkout do repositório
+      uses: actions/checkout@v2
 
-      - name: Set up Node.js version
-        uses: actions/setup-node@v1
-        with:
-          node-version: '18.x'
+    - name: Instalar o Rush globalmente
+      run: npm install -g @microsoft/rush
 
-      - name: npm install, build, and test
-        run: |
-          npm install
-          npm run build --if-present
-          npm run test --if-present
+    - name: Atualizar as dependências com o Rush
+      run: rush update
+      
+    - name: Resetar o banco de dados (api)
+      run: |
+        cd src/api
+        rushx db:reset
+    - name: Preencher o banco de dados (api)
+      run: |
+        cd src/api
+        rushx db:heavily-seed   
 
-      - name: Upload artifact for deployment job
-        uses: actions/upload-artifact@v2
-        with:
-          name: node-app
-          path: .
+    - name: Iniciar o servidor de desenvolvimento (api)
+      run: |
+        cd src/api
+        rushx build
+
+    - name: Upload artifact for deployment job
+      uses: actions/upload-artifact@v2
+      with:
+        name: node-app
+        path: node-app.zip
+        if-no-files-found: error  
 
   deploy:
     runs-on: ubuntu-latest
@@ -45,6 +56,9 @@ jobs:
         uses: actions/download-artifact@v2
         with:
           name: node-app
+      - run: |
+          unzip node-app.zip
+          rm node-app.zip      
 
       - name: 'Deploy to Azure Web App'
         id: deploy-to-webapp
